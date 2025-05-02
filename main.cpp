@@ -1196,7 +1196,7 @@ int main(int argc, char* argv[]){
     string inputBvh = "DataBase/Bvh/m" + input_number_str + ".bvh";
     string frameIntervalsMsgpack = "DataBase/frame_intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
     // 全身のデータ(23ジョイント)
-    string standMsgpackDir = "scripts/Yu/Database/new/msg_standardized_raw_data";
+    string standMsgpackDir = "Database/Stand_raw_data";
     string standDatabaseMsgpackDir = "scripts/Yu/Database/new/msg_standardized_" + camera_mode + "_split_data";
     string rawMsgpackDir = "scripts/Yu/Database/new/msg_raw_data";
     string databaseMsgpackDir = "scripts/Yu/Database/new/msg_" + camera_mode + "_split_data";
