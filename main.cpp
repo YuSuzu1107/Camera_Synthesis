@@ -1194,25 +1194,25 @@ int main(int argc, char* argv[]){
 
     // 入力 BVH ファイルパスを設定（入力番号に基づく）
     string inputBvh = "DataBase/Bvh/m" + input_number_str + ".bvh";
-    string frameIntervalsMsgpack = "DataBase/frame_intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
+    string frameIntervalsMsgpack = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
     // 全身のデータ(23ジョイント)
-    string standMsgpackDir = "Database/Stand_raw_data";
-    string standDatabaseMsgpackDir = "scripts/Yu/Database/new/msg_standardized_" + camera_mode + "_split_data";
-    string rawMsgpackDir = "scripts/Yu/Database/new/msg_raw_data";
-    string databaseMsgpackDir = "scripts/Yu/Database/new/msg_" + camera_mode + "_split_data";
+    string standMsgpackDir = "Database/Stand_Raw";
+    string standDatabaseMsgpackDir = "Database/Stand_Split";
+    string rawMsgpackDir = "Database/Raw";
+    string databaseMsgpackDir = "Database/Split";
     // ヒップ方向データ
-    string hipDirectionMsgpackDir = "scripts/Yu/Database/new/msg_hip_direction";
-    string hipDirectionDatabaseMsgpackDir = "scripts/Yu/Database/new/msg_hip_direction_" + camera_mode + "_split_data";
+    string hipDirectionMsgpackDir = "Database/Hip_Direction";
+    string hipDirectionDatabaseMsgpackDir = "Database/Hip_Direction_Split";
     // 音楽データ
-    string musicMsgpackDir = "scripts/Yu/Database/new/msg_align_music_features_5";
-    string musicDatabaseMsgpackDir = "scripts/Yu/Database/new/msg_" + camera_mode + "_split_align_music_features_5";
+    string musicMsgpackDir = "Database/Music_Features";
+    string musicDatabaseMsgpackDir = "Database/Music_Features_Split";
     // カメラデータ
-    string cameraPositionMsgpackDir = "DCM_data/amc_aligned_data/msg_CameraCentric";
-    string cameraRotationMsgpackDir = "DCM_data/amc_aligned_data/msg_CameraInterpolated";
+    string cameraPositionMsgpackDir = "DataBaase/CameraCentric";
+    string cameraRotationMsgpackDir = "DataBase/CameraInterpolated";
     // BPM データ
-    string bpmMsgpack = "scripts/Yu/Database/" + camera_mode + "_average_bpm_result.msgpack";
+    string bpmMsgpack = "Database/BPM/average_bpm.msgpack";
     // 出力ディレクトリ
-    string outputDir = "experiment/json";
+    string outputDir = "Output/";
 
     // コマンドライン引数で上書き可能な設定
     for (int i = 1; i < argc; i++) {
