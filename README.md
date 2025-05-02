@@ -2,8 +2,10 @@
 
 ## 必要なファイル
 
-* msgpack for C/C++
 * Boost 1.87.0
+* RapidJson
+
+これを`Library/` ディレクトリの下に配置する。
 
 ## 手順
  1. 以下のgoogle driveのリンクからファイルをダウンロードし、`DataBase/` ディレクトリの下に配置する。
@@ -12,4 +14,12 @@
 https://drive.google.com/drive/folders/1Q9HqYq2YPFhb8IbXfEeantl1hpu3jjaV?usp=share_link
 ```
 
- 2. 以下のコマンドでコンパイルし、実行する
+ 2. 以下のコマンドでコンパイルし、実行する。
+
+```.bash
+g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I./Library/msgpack-c-cpp_master/include -I ./Library/boost_1_87_0 -o camera_synthesis ./main.cpp
+
+./camera_synthesis
+```
+
+3. 初期合成なら`initial`と入力する。編集したい場合は`modify`と入力し、()内の選択肢を順番に入力する。
