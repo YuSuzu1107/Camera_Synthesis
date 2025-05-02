@@ -1193,8 +1193,8 @@ int main(int argc, char* argv[]){
     }
 
     // 入力 BVH ファイルパスを設定（入力番号に基づく）
-    string inputBvh = "DCM_data/amc_aligned_data/Aligned_BVH_Motion/m" + input_number_str + ".bvh";
-    string frameIntervalsMsgpack = "scripts/Yu/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
+    string inputBvh = "DataBase/Bvh/m" + input_number_str + ".bvh";
+    string frameIntervalsMsgpack = "DataBase/frame_intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
     // 全身のデータ(23ジョイント)
     string standMsgpackDir = "scripts/Yu/Database/new/msg_standardized_raw_data";
     string standDatabaseMsgpackDir = "scripts/Yu/Database/new/msg_standardized_" + camera_mode + "_split_data";
