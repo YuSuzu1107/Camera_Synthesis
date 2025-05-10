@@ -1212,7 +1212,7 @@ int main(int argc, char* argv[]){
     // BPM データ
     string bpmMsgpack = "Database/BPM/average_bpm.msgpack";
     // 出力ディレクトリ
-    string outputDir = "Output/";
+    string outputDir = "Output/json/";
 
     // コマンドライン引数で上書き可能な設定
     for (int i = 1; i < argc; i++) {
