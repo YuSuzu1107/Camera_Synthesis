@@ -37,13 +37,15 @@ python3 scripts/json2vmd.py \
 2. [Saba_Viewer](https://github.com/benikabocha/saba) を用いて可視化を行う。その際、モデルは [符华 from 神帝宇](https://www.aplaybox.com/u/359396473?searchKeyword=符华) に似たものを選ぶと良い。
    また、Saba_Viewerの使用にあたって、2点ほどソースコードを変更する必要がある。
 
+1点目
 ```.c
-(1)
 ////saba-master/src/Saba/Model/MMD/VMDFile.h
 //uint32_t		m_viewAngle;//for original camera .vmd file
 float		m_viewAngle;//for synthesized camera .vmd file
+```
 
-(2)
+2点目
+```.c
 ////saba-master/src/Saba/Model/MMD/VMDCameraAnimation.cpp
 //Comment out the following code from line 56~89
 // if ((key1.m_time - key0.m_time) > 1)
