@@ -29,7 +29,7 @@ g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I
 
 ```.bash
 python3 scripts/json2vmd.py \
---json_dir experiment/json \
---vmd_dir experiment \
+--json_dir Output/json \
+--vmd_dir Output/vmd \
 --data_type camera
 ```
