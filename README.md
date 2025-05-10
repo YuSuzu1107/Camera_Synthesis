@@ -35,7 +35,7 @@ python3 scripts/json2vmd.py \
 ```
 
 2. [Saba_Viewer](https://github.com/benikabocha/saba) を用いて可視化を行う。その際、モデルは [符华 from 神帝宇](https://www.aplaybox.com/u/359396473?searchKeyword=符华) に似たものを選ぶと良い。
-   また、Saba_Viewerの使用にあたって、2点ほどソースコードを変更する必要がある。
+   また、[Saba_Viewer](https://github.com/benikabocha/saba) の使用にあたって、2点ほどソースコードを変更する必要がある。
 
 1点目
 ```.c
