@@ -2,8 +2,9 @@
 
 ## 必要なファイル
 
-* Boost 1.87.0
-* RapidJson
+* [Boost 1.87.0](https://www.boost.org/releases/1.87.0/)
+* [RapidJson](https://github.com/Tencent/rapidjson/)
+* [msgpack for C++](https://github.com/msgpack/msgpack-c/tree/cpp_master)
 
 これを`Library/` ディレクトリの下に配置する。
 
