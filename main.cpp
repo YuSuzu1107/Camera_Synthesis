@@ -31,10 +31,45 @@ struct FrameData {
 };
 
 // MessagePack のヘルパー関数
+// msgpack::object_handle readMsgpack(const string &path) {
+//     ifstream ifs(path, ios::binary);
+//     vector<char> buffer((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
+//     return msgpack::unpack(buffer.data(), buffer.size());
+// }
+
 msgpack::object_handle readMsgpack(const string &path) {
+    // 1) ファイルを開く
     ifstream ifs(path, ios::binary);
+    if (!ifs) {
+        cerr << "[readMsgpack] ファイルオープン失敗: " << path << endl;
+        // 必要ならここで例外を投げるか、デフォルトの空オブジェクトを返す
+        throw runtime_error("Cannot open file: " + path);
+    }
+
+    // 2) 全バイトを読み込む
     vector<char> buffer((istreambuf_iterator<char>(ifs)), istreambuf_iterator<char>());
-    return msgpack::unpack(buffer.data(), buffer.size());
+    size_t bufSize = buffer.size();
+
+    // 3) unpack を試みる
+    try {
+        return msgpack::unpack(buffer.data(), bufSize);
+    }
+    catch (const msgpack::v1::insufficient_bytes &e) {
+        // ここで「ファイル名」と「読み込んだバッファ長」を出力
+        cerr << "[readMsgpack] insufficient_bytes 例外: " << e.what() << "\n"
+             << "  → 対象ファイル: " << path << "\n"
+             << "  → 読み込んだバイト数: " << bufSize << endl;
+        // もしこれ以上処理を止めたくないなら、デフォルトの空オブジェクトを返すなども可能ですが、
+        // 今回はこのまま再スローして呼び出し元でさらにキャッチする例を示します。
+        throw;
+    }
+    catch (const std::exception &e) {
+        // その他の例外をキャッチしたい場合
+        cerr << "[readMsgpack] その他の例外: " << e.what() << "\n"
+             << "  → 対象ファイル: " << path << "\n"
+             << "  → 読み込んだバイト数: " << bufSize << endl;
+        throw;
+    }
 }
 
 const msgpack::object* getMember(const msgpack::object &obj, const string &key) {
@@ -478,7 +513,8 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
                                        int step,
                                        const vector<int> &modes,
                                        const string &cameraPositionMsgpackDir,
-                                       int mParam) {
+                                       int mParam,
+                                       const string &beatFileForInput) {
     CalDistance2Result result;
     // 入力モーション番号の抽出
     string inputName = inputBvh;
@@ -491,7 +527,6 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
     result.inputNumber = inputNumber;
     
     // 入力モーションの BPM ファイル読み込み
-    string beatFileForInput = "scripts/Yu/Database/msg_beats/beat" + inputNumber + ".msgpack";
     msgpack::object_handle beatOh = readMsgpack(beatFileForInput);
     msgpack::object beatObj = beatOh.get();
     const msgpack::object* beatsMember = getMember(beatObj, "beats");
@@ -1195,6 +1230,7 @@ int main(int argc, char* argv[]){
     // 入力 BVH ファイルパスを設定（入力番号に基づく）
     string inputBvh = "DataBase/Bvh/m" + input_number_str + ".bvh";
     string frameIntervalsMsgpack = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
+    string beatFileForInput = "Database/Beats/beat" + input_number_str + ".msgpack";
     // 全身のデータ(23ジョイント)
     string standMsgpackDir = "Database/Stand_Raw";
     string standDatabaseMsgpackDir = "Database/Stand_Split";
@@ -1207,7 +1243,7 @@ int main(int argc, char* argv[]){
     string musicMsgpackDir = "Database/Music_Features";
     string musicDatabaseMsgpackDir = "Database/Music_Features_Split";
     // カメラデータ
-    string cameraPositionMsgpackDir = "DataBaase/CameraCentric";
+    string cameraPositionMsgpackDir = "DataBase/CameraCentric";
     string cameraRotationMsgpackDir = "DataBase/CameraInterpolated";
     // BPM データ
     string bpmMsgpack = "Database/BPM/average_bpm.msgpack";
@@ -1221,6 +1257,18 @@ int main(int argc, char* argv[]){
             inputBvh = argv[++i];
         } else if (arg == "--output_dir" && i + 1 < argc) {
             outputDir = argv[++i];
+        }
+    }
+    
+    if (!fs::exists(outputDir)) {
+        try {
+            fs::create_directories(outputDir);
+            cout << "[INFO] 出力先ディレクトリを作成しました: " << outputDir << endl;
+        }
+        catch (const std::exception &e) {
+            cerr << "[ERROR] 出力先ディレクトリの作成に失敗しました: " << outputDir
+                 << "\n        例外メッセージ: " << e.what() << endl;
+            return 1;
         }
     }
 
@@ -1545,7 +1593,7 @@ int main(int argc, char* argv[]){
     CalDistance2Result cd2Res = calDistance2Msgpack(bpmMsgpack, musicMsgpackDir, musicDatabaseMsgpackDir, inputBvh, standMsgpackDir, standDatabaseMsgpackDir,
                                                      hipDirectionMsgpackDir, hipDirectionDatabaseMsgpackDir,
                                                      rawMsgpackDir, databaseMsgpackDir, frameIntervals, step,
-                                                     modes, cameraPositionMsgpackDir, m);
+                                                     modes, cameraPositionMsgpackDir, m, beatFileForInput);
     
     // カメラデータ組み立て
     CameraRetrievalResult camRes = cameraDataRetrievalMsgpack(cameraPositionMsgpackDir, cameraRotationMsgpackDir,
