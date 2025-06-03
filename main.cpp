@@ -260,7 +260,7 @@ vector<vector<FrameData>> splitByFrameIntervals(const vector<FrameData> &data,
 // 距離の平均値算出
 double getDistanceAverageForCandidateMsgpack(const string &candidateFile,
                                                int lengthFrames,
-                                               const string &cameraPositionMsgpackDir) {
+                                               const string &CameraPositionDir) {
     string baseName = candidateFile;
     if (baseName.size() > 7 && baseName.substr(baseName.size() - 7) == ".msgpack") {
         baseName = baseName.substr(0, baseName.size() - 7);
@@ -281,7 +281,7 @@ double getDistanceAverageForCandidateMsgpack(const string &candidateFile,
     int segStart = stoi(secondPart.substr(0, commaPos));
     int segEnd = stoi(secondPart.substr(commaPos + 1));
     
-    string cameraPositionFile = cameraPositionMsgpackDir + "/c" + fileNumberStr + ".msgpack";
+    string cameraPositionFile = CameraPositionDir + "/c" + fileNumberStr + ".msgpack";
     msgpack::object_handle oh = readMsgpack(cameraPositionFile);
     msgpack::object obj = oh.get();
     const msgpack::object* distanceObj = getMember(obj, "Distance");
@@ -361,11 +361,11 @@ bool parseSegmentFilename(const string &filename, string &outFileNumber, int &ou
 }
 
 // BPM 値を取得する
-double getBpmFromBpmMsgpack(const string &bpmMsgpackPath,
+double getBpmFromBpmMsgpack(const string &BpmData,
                              const string &fileNumberStr,
                              int startFrame,
                              int endFrame) {
-    msgpack::object_handle oh = readMsgpack(bpmMsgpackPath);
+    msgpack::object_handle oh = readMsgpack(BpmData);
     msgpack::object obj = oh.get();
     const msgpack::object* fileObj = getMember(obj, fileNumberStr);
     if (!fileObj || fileObj->type != msgpack::type::ARRAY)
@@ -425,14 +425,14 @@ return diffSum;
 // カメラ位置の平均（移動距離）を取得する
 double getPositionAverageForCandidateMsgpack(const string &candidateFile,
                                                int segmentLen,
-                                               const string &cameraPositionMsgpackDir) {
+                                               const string &CameraPositionDir) {
     string fileNumberStr;
     int segStart = 0, segEnd = 0;
     if (!parseSegmentFilename(candidateFile, fileNumberStr, segStart, segEnd)) {
         cerr << "parseSegmentFilename失敗: " << candidateFile << endl;
         return 0.0;
     }
-    string cameraDataFile = cameraPositionMsgpackDir + "/c" + fileNumberStr + ".msgpack";
+    string cameraDataFile = CameraPositionDir + "/c" + fileNumberStr + ".msgpack";
     msgpack::object_handle oh = readMsgpack(cameraDataFile);
     msgpack::object obj = oh.get();
     const msgpack::object* cameraEyeObj = getMember(obj, "camera_eye");
@@ -499,44 +499,34 @@ struct CalDistance2Result {
     vector<array<double, 3>> translations; // 全フレーム分の平行移動
 };
 
-CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
-                                       const string &musicMsgpackDir, 
-                                       const string &musicDatabaseMsgpackDir,
-                                       const string &inputBvh, 
-                                       const string &standMsgpackDir,
-                                       const string &standDatabaseMsgpackDir,
-                                       const string &hipDirectionMsgpackDir,
-                                       const string &hipDirectionDatabaseMsgpackDir,
-                                       const string &rawMsgpackDir,
-                                       const string &databaseMsgpackDir,
+CalDistance2Result calDistance2Msgpack(const string &inputNumber,
+                                       const string &inputPositionPath,
+                                       const string &inputStandPositionPath,
+                                       const string &inputHipPath,
+                                       const string &inputBeatPath,
+                                       const string &inputMusicPath,
+                                       const string &StandPositionDatabaseDir,
+                                       const string &PositionDatabaseDir,
+                                       const string &HipDirectionDatabaseDir,
+                                       const string &MusicDatabaseDir,
+                                       const string &CameraPositionDir,
+                                       const string &BpmData,
                                        const vector<int> &frameIntervals,
-                                       int step,
                                        const vector<int> &modes,
-                                       const string &cameraPositionMsgpackDir,
-                                       int mParam,
-                                       const string &beatFileForInput) {
+                                       int step) {
+
     CalDistance2Result result;
-    // 入力モーション番号の抽出
-    string inputName = inputBvh;
-    size_t pos = inputName.find_last_of("/\\");
-    if (pos != string::npos)
-        inputName = inputName.substr(pos + 1);
-    if (inputName.size() > 4 && inputName.substr(inputName.size() - 4) == ".bvh")
-        inputName = inputName.substr(0, inputName.size() - 4);
-    string inputNumber = (inputName.size() > 1) ? inputName.substr(1) : inputName;
-    result.inputNumber = inputNumber;
     
     // 入力モーションの BPM ファイル読み込み
-    msgpack::object_handle beatOh = readMsgpack(beatFileForInput);
+    msgpack::object_handle beatOh = readMsgpack(inputBeatPath);
     msgpack::object beatObj = beatOh.get();
     const msgpack::object* beatsMember = getMember(beatObj, "beats");
 
-    // --- 入力側音楽特徴量の読み込み ---
-    string inputMusicFile = musicMsgpackDir + "/a" + inputNumber + ".msgpack";
-    msgpack::object_handle inputMusicOh = readMsgpack(inputMusicFile);
+    // --- 入力側音楽特徴量のロード ---
+    msgpack::object_handle inputMusicOh = readMsgpack(inputMusicPath);
     msgpack::object inputMusicObj = inputMusicOh.get();
     if (inputMusicObj.type != msgpack::type::ARRAY) {
-        cerr << "Error: Input music feature file " << inputMusicFile
+        cerr << "Error: Input music feature file " << inputMusicPath
              << " does not contain an array." << endl;
     }
 
@@ -559,18 +549,13 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
 
         segStartFrame = segEndFrame;
     }
-    
-    // 入力モーションの標準化データとヒップ方向データの読み込み
-    string inputStandMsgpackPath = standMsgpackDir + "/m" + inputNumber + ".msgpack";
-    vector<FrameData> inputPositions = loadJointPositions(inputStandMsgpackPath);
-    string inputHipMsgpackPath = hipDirectionMsgpackDir + "/m" + inputNumber + ".msgpack";
-    vector<FrameData> inputHipDirections = loadJointPositions(inputHipMsgpackPath);
-    
-    // Raw データの読み込み
-    string rawInputPath = rawMsgpackDir + "/m" + inputNumber + ".msgpack";
-    vector<FrameData> rawInputFrames = loadJointPositions(rawInputPath);
-    vector<vector<FrameData>> rawInputSegments = splitByFrameIntervals(rawInputFrames, frameIntervals);
-    vector<vector<FrameData>> inputSegments = splitByFrameIntervals(inputPositions, frameIntervals);
+
+    // 入力モーションデータの読み込み
+    vector<FrameData> inputStandPositions = loadJointPositions(inputStandPositionPath);
+    vector<FrameData> inputHipDirections = loadJointPositions(inputHipPath);
+    vector<FrameData> inputPositionFrames = loadJointPositions(inputPositionPath);
+    vector<vector<FrameData>> rawInputSegments = splitByFrameIntervals(inputPositionFrames, frameIntervals);
+    vector<vector<FrameData>> inputSegments = splitByFrameIntervals(inputStandPositions, frameIntervals);
     vector<vector<FrameData>> hipSegments = splitByFrameIntervals(inputHipDirections, frameIntervals);
     
     // 各セグメントごとに類似ファイルを検索
@@ -590,7 +575,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
         vector<vector<double>> candidateFeatureDiffs;
 
         // データベースディレクトリ内の各ファイルを走査
-        for (const auto &entry : fs::directory_iterator(standDatabaseMsgpackDir)) {
+        for (const auto &entry : fs::directory_iterator(StandPositionDatabaseDir)) {
             if (!entry.is_regular_file())
                 continue;
             string fname = entry.path().filename().string(); // 例："m62_(0,550).msgpack"
@@ -613,7 +598,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             int dbStart = 0, dbEnd = 0;
             if (!parseSegmentFilename(fname, dbFileNumberStr, dbStart, dbEnd))
                 continue;
-            string dbHipFilePath = hipDirectionDatabaseMsgpackDir + "/m" + dbFileNumberStr + "_(" +
+            string dbHipFilePath = HipDirectionDatabaseDir + "/m" + dbFileNumberStr + "_(" +
                                     to_string(dbStart) + ", " + to_string(dbEnd) + ").msgpack";
             vector<FrameData> dbHipPositions = loadJointPositions(dbHipFilePath);
             if (dbHipPositions.size() < (size_t)segmentLen)
@@ -622,7 +607,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
                              vector<FrameData>(dbPositions.begin(), dbPositions.begin() + segmentLen), step);
             double hipDist = calculateHipVectorDistanceSparse(hipSegment,
                              vector<FrameData>(dbHipPositions.begin(), dbHipPositions.begin() + segmentLen), step);
-            double dbBpmVal = getBpmFromBpmMsgpack(bpmMsgpackPath, dbFileNumberStr, dbStart, dbEnd);
+            double dbBpmVal = getBpmFromBpmMsgpack(BpmData, dbFileNumberStr, dbStart, dbEnd);
             double bpmDiff = fabs(segmentBpmInput - dbBpmVal);
             segmentDistances.push_back(segDist);
             hipDistances.push_back(hipDist);
@@ -630,7 +615,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             fileNames.push_back(fname);
             // 楽曲特徴量の差分計算
             // 候補側は musicDatabaseDir 内の "a[dbFileNumberStr].msgpack" から、対象区間のシーケンスを抽出
-            string candidateMusicFile = musicDatabaseMsgpackDir + "/m" + dbFileNumberStr + "_(" +
+            string candidateMusicFile = MusicDatabaseDir + "/m" + dbFileNumberStr + "_(" +
                                    to_string(dbStart) + "," + to_string(dbEnd) + ").msgpack";
             msgpack::object_handle candidateMusicOh = readMsgpack(candidateMusicFile);
             msgpack::object candidateMusicObj = candidateMusicOh.get();
@@ -668,8 +653,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
         vector<double> normFeatureScore = normalizeValues(featureScores);
  
         // 類似度の重み付け
-        // 変更箇所
-        double weight_motion = 1, weight_music = 5;
+        double weight_motion = 1, weight_music = 1;
 
         vector<pair<string, double>> scores;
         for (size_t i = 0; i < fileNames.size(); i++) {
@@ -696,7 +680,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             for (int i = 0; i < top_n; i++) {
                 std::string candidate_file = scores[i].first;
                 double candidate_score = scores[i].second;
-                double avg_dist = getDistanceAverageForCandidateMsgpack(candidate_file, segmentLen, cameraPositionMsgpackDir);
+                double avg_dist = getDistanceAverageForCandidateMsgpack(candidate_file, segmentLen, CameraPositionDir);
                 if (avg_dist < min_distance_val) {
                     min_distance_val = avg_dist;
                     best_file = candidate_file;
@@ -718,7 +702,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             for (int i = 0; i < top_n; i++) {
                 std::string candidate_file = scores[i].first;
                 double candidate_score = scores[i].second;
-                double avg_dist = getDistanceAverageForCandidateMsgpack(candidate_file, segmentLen, cameraPositionMsgpackDir);
+                double avg_dist = getDistanceAverageForCandidateMsgpack(candidate_file, segmentLen, CameraPositionDir);
                 if (avg_dist > max_distance_val && avg_dist < -5) {
                     max_distance_val = avg_dist;
                     best_file = candidate_file;
@@ -740,7 +724,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             for (int i = 0; i < top_n; i++) {
                 std::string candidate_file = scores[i].first;
                 double candidate_score = scores[i].second;
-                double movement_distance = getPositionAverageForCandidateMsgpack(candidate_file, segmentLen, cameraPositionMsgpackDir);
+                double movement_distance = getPositionAverageForCandidateMsgpack(candidate_file, segmentLen, CameraPositionDir);
                 if (movement_distance > max_camera_movement) {
                     max_camera_movement = movement_distance;
                     best_file = candidate_file;
@@ -761,7 +745,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             for (int i = 0; i < top_n; i++) {
                 std::string candidate_file = scores[i].first;
                 double candidate_score = scores[i].second;
-                double movement_distance = getPositionAverageForCandidateMsgpack(candidate_file, segmentLen, cameraPositionMsgpackDir);
+                double movement_distance = getPositionAverageForCandidateMsgpack(candidate_file, segmentLen, CameraPositionDir);
                 if (movement_distance < min_camera_movement) {
                     min_camera_movement = movement_distance;
                     best_file = candidate_file;
@@ -782,8 +766,8 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             // 視点引き (mode==1) の評価: Distance の平均が小さい順にソート
             std::vector<std::pair<std::string, double>> sorted_mode1(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode1.begin(), sorted_mode1.end(), [&](const auto &a, const auto &b) {
-                return getDistanceAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir) <
-                        getDistanceAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                return getDistanceAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir) <
+                        getDistanceAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
             });
             for (int rank = 1; rank <= static_cast<int>(sorted_mode1.size()); ++rank) {
                 rank_mode1[sorted_mode1[rank - 1].first] = rank;
@@ -792,8 +776,8 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             // 動き多め (mode==3) の評価: Camera Movement が大きい順にソート
             std::vector<std::pair<std::string, double>> sorted_mode3(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode3.begin(), sorted_mode3.end(), [&](const auto &a, const auto &b) {
-                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir) >
-                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir) >
+                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
             });
             for (int rank = 1; rank <= static_cast<int>(sorted_mode3.size()); ++rank) {
                 rank_mode3[sorted_mode3[rank - 1].first] = rank;
@@ -826,13 +810,13 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             // 視点寄り (mode==2) の評価: 特定条件付きソート
             std::vector<std::pair<std::string, double>> sorted_mode2(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode2.begin(), sorted_mode2.end(), [&](const auto &a, const auto &b) {
-                double pa = getPositionAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir);
-                double pb = getPositionAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                double pa = getPositionAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir);
+                double pb = getPositionAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
                 if ((pa > -5) != (pb > -5)) {
                     return (pa <= -5);  // 値が -5 以下のものを優先
                 } else {
-                    double da = getDistanceAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir);
-                    double db = getDistanceAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                    double da = getDistanceAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir);
+                    double db = getDistanceAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
                     return da > db; 
                 }
             });
@@ -843,8 +827,8 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             // 動き多め (mode==3) の評価: Camera Movement が大きい順
             std::vector<std::pair<std::string, double>> sorted_mode3(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode3.begin(), sorted_mode3.end(), [&](const auto &a, const auto &b) {
-                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir) >
-                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir) >
+                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
             });
             for (int rank = 1; rank <= static_cast<int>(sorted_mode3.size()); ++rank) {
                 rank_mode3[sorted_mode3[rank - 1].first] = rank;
@@ -875,8 +859,8 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             
             std::vector<std::pair<std::string, double>> sorted_mode1(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode1.begin(), sorted_mode1.end(), [&](const auto &a, const auto &b) {
-                return getDistanceAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir) <
-                        getDistanceAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                return getDistanceAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir) <
+                        getDistanceAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
             });
             for (int rank = 1; rank <= static_cast<int>(sorted_mode1.size()); ++rank) {
                 rank_mode1[sorted_mode1[rank - 1].first] = rank;
@@ -884,8 +868,8 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             
             std::vector<std::pair<std::string, double>> sorted_mode4(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode4.begin(), sorted_mode4.end(), [&](const auto &a, const auto &b) {
-                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir) <
-                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir) <
+                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
             });
             for (int rank = 1; rank <= static_cast<int>(sorted_mode4.size()); ++rank) {
                 rank_mode4[sorted_mode4[rank - 1].first] = rank;
@@ -915,13 +899,13 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             
             std::vector<std::pair<std::string, double>> sorted_mode2(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode2.begin(), sorted_mode2.end(), [&](const auto &a, const auto &b) {
-                double pa = getPositionAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir);
-                double pb = getPositionAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                double pa = getPositionAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir);
+                double pb = getPositionAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
                 if ((pa > -5) != (pb > -5)) {
                     return (pa <= -5);
                 } else {
-                    double da = getDistanceAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir);
-                    double db = getDistanceAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                    double da = getDistanceAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir);
+                    double db = getDistanceAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
                     return da > db;
                 }
             });
@@ -931,8 +915,8 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
             
             std::vector<std::pair<std::string, double>> sorted_mode4(scores.begin(), scores.begin() + top_n);
             std::sort(sorted_mode4.begin(), sorted_mode4.end(), [&](const auto &a, const auto &b) {
-                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, cameraPositionMsgpackDir) <
-                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, cameraPositionMsgpackDir);
+                return getPositionAverageForCandidateMsgpack(a.first, segmentLen, CameraPositionDir) <
+                        getPositionAverageForCandidateMsgpack(b.first, segmentLen, CameraPositionDir);
             });
             for (int rank = 1; rank <= static_cast<int>(sorted_mode4.size()); ++rank) {
                 rank_mode4[sorted_mode4[rank - 1].first] = rank;
@@ -963,7 +947,7 @@ CalDistance2Result calDistance2Msgpack(const string &bpmMsgpackPath,
                         << " with score = " << min_score << std::endl;
         }
         cout << "選択ファイル: " << chosenFile << "\n";
-        string chosenDbPath = databaseMsgpackDir + "/" + chosenFile;
+        string chosenDbPath = PositionDatabaseDir + "/" + chosenFile;
         vector<FrameData> chosenDbFrames = loadJointPositions(chosenDbPath);
         if (chosenDbFrames.size() > (size_t)segmentLen)
             chosenDbFrames.resize(segmentLen);
@@ -994,8 +978,8 @@ struct CameraRetrievalResult {
     vector<double> viewangle;
 };
 
-CameraRetrievalResult cameraDataRetrievalMsgpack(const string &cameraPositionMsgpackDir,
-                                                   const string &cameraRotationMsgpackDir,
+CameraRetrievalResult cameraDataRetrievalMsgpack(const string &CameraPositionDir,
+                                                   const string &CameraRotationDir,
                                                    const vector<string> &closestFiles,
                                                    const vector<int> &lengths,
                                                    const string &inputNumber,
@@ -1015,8 +999,8 @@ CameraRetrievalResult cameraDataRetrievalMsgpack(const string &cameraPositionMsg
         string fileNumberStr;
         int segStart = 0, segEnd = 0;
         parseSegmentFilename(fileName, fileNumberStr, segStart, segEnd);
-        string posFile = cameraPositionMsgpackDir + "/c" + fileNumberStr + ".msgpack";
-        string rotFile = cameraRotationMsgpackDir + "/c" + fileNumberStr + ".msgpack";
+        string posFile = CameraPositionDir + "/c" + fileNumberStr + ".msgpack";
+        string rotFile = CameraRotationDir + "/c" + fileNumberStr + ".msgpack";
         msgpack::object_handle posOh = readMsgpack(posFile);
         msgpack::object posObj = posOh.get();
         msgpack::object_handle rotOh = readMsgpack(rotFile);
@@ -1101,7 +1085,7 @@ void outputCameraJson(const vector<array<double, 3>> &position,
         records.PushBack(frameData, allocator);
     }
     doc.AddMember("CameraKeyFrameRecord", records, allocator);
-    string outPath = outputDir + "/MM" + inputNumber + ".json";
+    string outPath = outputDir + "/output.json";
     ofstream ofs(outPath);
     if (!ofs.is_open()) {
         cerr << "出力ファイルを開けません: " << outPath << endl;
@@ -1113,19 +1097,62 @@ void outputCameraJson(const vector<array<double, 3>> &position,
     cout << "出力ファイル: " << outPath << endl;
 }
 
-// main 関数（対話的入力ロジックを追加）
+// main 関数
 int main(int argc, char* argv[]){
-    string camera_mode = "normal";
 
+    if (argc < 4) {
+        std::cerr << "使い方: " << argv[0]
+                  << " {input_motion_data_dir} {input_music_data_dir} {output_dir}\n"
+                     "  - input_motion_data_dir :  モーションデータがあるディレクトリ\n"
+                     "  - input_music_data_dir :  音楽データがあるディレクトリ\n"
+                     "  - output_dir            :  結果のカメラデータを出力したいディレクトリ\n";
+        return 1;
+    }
+
+    std::string inputMotionDir = argv[1];
+    std::string inputMusicDir  = argv[2];
+    std::string outputDir       = argv[3];
+
+    // 必要なら末尾にスラッシュを付与
+    if (!outputDir.empty() && outputDir.back() != '/' && outputDir.back() != '\\') {
+        outputDir += "/";
+    }
+
+    // 出力先ディレクトリがなければ作る
+    if (!fs::exists(outputDir)) {
+        try {
+            fs::create_directories(outputDir);
+            std::cout << "[INFO] 出力先ディレクトリを作成しました: " << outputDir << std::endl;
+        }
+        catch (const std::exception &e) {
+            std::cerr << "[ERROR] 出力先ディレクトリの作成に失敗しました: " << outputDir
+                      << "\n        例外メッセージ: " << e.what() << std::endl;
+            return 1;
+        }
+    }
+
+    // 対象とするファイル
+    string file;
+    cout << "Existing or New\n> ";  
+    cin >> file;
+
+    // モードが "Existing" の場合
+    string inputNumber;
+    if (file == "Existing") {
+        cout << "入力番号を入力してください\n> ";
+        cin >> inputNumber;
+    }
+    // モードが "New" の場合
+    else if (file == "New") {
+        inputNumber = "0";
+    }
+
+    // モード分岐
     string mode;
     cout << "initial or modify\n> ";
     cin >> mode;
 
-    string input_number_str;
-    cout << "入力番号をいくつにしますか？\n> ";
-    cin >> input_number_str;
-    int input_number = stoi(input_number_str);
-
+    // ユーザーインタラクティブの変数
     int camera_view, cut_number, m;
     string view, view_place, movement, movement_place, continue_view, continue_movement;
     vector<int> partial_views;     // 部分的な視点変更を保持するリスト
@@ -1227,63 +1254,39 @@ int main(int argc, char* argv[]){
         }
     }
 
-    // 入力 BVH ファイルパスを設定（入力番号に基づく）
-    string inputBvh = "DataBase/Bvh/m" + input_number_str + ".bvh";
-    string inputBeat = "Database/Beats/beat" + input_number_str + ".msgpack";
-    // ヒップ方向データ
-    string hipDirectionMsgpackDir = "Database/Hip_Direction";
-    string hipDirectionDatabaseMsgpackDir = "Database/Hip_Direction_Split";
-    // 音楽データ
-    string musicMsgpackDir = "Database/Music_Features";
-    string musicDatabaseMsgpackDir = "Database/Music_Features_Split";
-    
-    // データベース(不変)
-    // 全身のデータ(23ジョイント)
-    string standMsgpackDir = "Database/Stand_Raw";
-    string standDatabaseMsgpackDir = "Database/Stand_Split";
-    string rawMsgpackDir = "Database/Raw";
-    string databaseMsgpackDir = "Database/Split";
-    // カメラデータ
-    string cameraPositionMsgpackDir = "DataBase/CameraCentric";
-    string cameraRotationMsgpackDir = "DataBase/CameraInterpolated";
-    // カット頻度
-    string frameIntervalsMsgpack = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
-    
-    // BPM データ
-    string bpmMsgpack = "Database/BPM/average_bpm.msgpack";
-    // 出力ディレクトリ
-    string outputDir = "Output/json/";
+    // 入力モーションデータ
+    string inputPositionPath = inputMotionDir + "/raw.msgpack";
+    string inputStandPositionPath = inputMotionDir + "/stand.msgpack"; 
+    string inputHipPath = inputMotionDir + "/hip.msgpack";
+    // 入力音楽データ
+    string inputBeatPath = inputMusicDir + "/beat.msgpack";
+    string inputMusicPath = inputMusicDir + "/music.msgpack";
 
-    // コマンドライン引数で上書き可能な設定
-    for (int i = 1; i < argc; i++) {
-        string arg = argv[i];
-        if (arg == "--input_bvh" && i + 1 < argc) {
-            inputBvh = argv[++i];
-        } else if (arg == "--output_dir" && i + 1 < argc) {
-            outputDir = argv[++i];
-        }
-    }
-    
-    if (!fs::exists(outputDir)) {
-        try {
-            fs::create_directories(outputDir);
-            cout << "[INFO] 出力先ディレクトリを作成しました: " << outputDir << endl;
-        }
-        catch (const std::exception &e) {
-            cerr << "[ERROR] 出力先ディレクトリの作成に失敗しました: " << outputDir
-                 << "\n        例外メッセージ: " << e.what() << endl;
-            return 1;
-        }
-    }
+    // フレーム間隔(カット頻度依存)
+    string FrameIntervals = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
+
+    // データベースのディレクトリ
+    // 全身のデータ(23ジョイント)
+    string StandPositionDatabaseDir = "Database/Stand_Split";
+    string PositionDatabaseDir = "Database/Split";
+    // ヒップ方向データ
+    string HipDirectionDatabaseDir = "Database/Hip_Direction_Split";
+    // 音楽データ
+    string MusicDatabaseDir = "Database/Music_Features_Split";
+    // カメラデータ
+    string CameraPositionDir = "DataBase/CameraCentric";
+    string CameraRotationDir = "DataBase/CameraInterpolated";
+    // BPM データ
+    string BpmData = "Database/BPM/average_bpm.msgpack";
 
     // frame_intervals の読み込み（MessagePack 版）
-    msgpack::object_handle intervalsOh = readMsgpack(frameIntervalsMsgpack);
+    msgpack::object_handle intervalsOh = readMsgpack(FrameIntervals);
     msgpack::object intervalsObj = intervalsOh.get();
+
     // 対話入力で得た input_number_str を利用
-    string inputNumStr = input_number_str;
     vector<int> frameIntervals;
     vector<int> sabi_indices;
-    const msgpack::object* fiMember = getMember(intervalsObj, inputNumStr);
+    const msgpack::object* fiMember = getMember(intervalsObj, inputNumber);
     if (fiMember && fiMember->type == msgpack::type::MAP) {
         const msgpack::object* arr = getMember(*fiMember, "frame_intervals");
         if (arr && arr->type == msgpack::type::ARRAY) {
@@ -1291,9 +1294,9 @@ int main(int argc, char* argv[]){
                 frameIntervals.push_back(arr->via.array.ptr[i].as<int>());
             }
         } else {
-            cerr << "Error: frame_intervals_msgpack に " << inputNumStr << " が含まれていません\n";
+            cerr << "Error: frame_intervals_msgpack に " << inputNumber << " が含まれていません\n";
             return 1;
-        }   
+        }
         // sabi の読み込み（オプショナル）
         const msgpack::object* sabiArr = getMember(*fiMember, "sabi");
         if (sabiArr && sabiArr->type == msgpack::type::ARRAY) {
@@ -1301,12 +1304,8 @@ int main(int argc, char* argv[]){
                 sabi_indices.push_back(sabiArr->via.array.ptr[i].as<int>());
             }
         }
-    } else {
-            cerr << "Error: frame_intervals_msgpack に " << inputNumStr << " が含まれていません\n";
-            return 1;
     }
 
-    // modes ベクトルの設定
     // modes ベクトルの設定（すべて 10 で初期化）
     vector<int> modes(frameIntervals.size(), 10);
     int step = 1;
@@ -1326,7 +1325,8 @@ int main(int argc, char* argv[]){
         }
         cout << endl;
     }
-    // ----- ビューに関する分岐 -----
+
+    // ユーザー入力の条件分岐
     if (mode == "modify") {
         if (view == "引き視点") {
             if (view_place == "サビ") {
@@ -1594,13 +1594,12 @@ int main(int argc, char* argv[]){
 
 
     // 類似ファイル検索
-    CalDistance2Result cd2Res = calDistance2Msgpack(bpmMsgpack, musicMsgpackDir, musicDatabaseMsgpackDir, inputBvh, standMsgpackDir, standDatabaseMsgpackDir,
-                                                     hipDirectionMsgpackDir, hipDirectionDatabaseMsgpackDir,
-                                                     rawMsgpackDir, databaseMsgpackDir, frameIntervals, step,
-                                                     modes, cameraPositionMsgpackDir, m, inputBeat);
-    
+    CalDistance2Result cd2Res = calDistance2Msgpack(inputNumber, inputPositionPath, inputStandPositionPath, inputHipPath, inputBeatPath, inputMusicPath, 
+                                                     StandPositionDatabaseDir, PositionDatabaseDir, HipDirectionDatabaseDir, MusicDatabaseDir,
+                                                     CameraPositionDir, BpmData, frameIntervals, modes, step
+                                                    );
     // カメラデータ組み立て
-    CameraRetrievalResult camRes = cameraDataRetrievalMsgpack(cameraPositionMsgpackDir, cameraRotationMsgpackDir,
+    CameraRetrievalResult camRes = cameraDataRetrievalMsgpack(CameraPositionDir, CameraRotationDir,
                                                                cd2Res.closestFiles, cd2Res.lengths,
                                                                cd2Res.inputNumber, cd2Res.translations);
     
