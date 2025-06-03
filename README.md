@@ -19,7 +19,9 @@ g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I
 ./camera_synthesis
 ```
 
-3. 初期合成なら`initial`と入力する。編集したい場合は`modify`と入力し、()内の選択肢を順番に入力する。
+3. 初期合成なら`initial`、編集したい場合は`modify`と入力する。
+
+4. 質問が順番に表示されるので、()内の選択肢を順番に入力する。
 
 ## 可視化
 1. 以下のコマンドを用いて`.vmd`形式に変換する。
