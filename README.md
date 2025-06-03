@@ -16,7 +16,7 @@
 ```.bash
 g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I./Library/msgpack-c-cpp_master/include -I ./Library/boost_1_87_0 -o camera_synthesis ./main.cpp
 
-./camera_synthesis
+./camera_synthesis {input_motion_data_dir} {input_music_data_dir} {output_json_dir}
 ```
 
 3. DCMデータセット内のデータに対してカメラワークを生成したければ`Existing`、新しいデータに対してカメラワークを生成したければ`New`と入力する。
@@ -30,8 +30,8 @@ g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I
 
 ```.bash
 python3 scripts/json2vmd.py \
---json_dir Output/json \
---vmd_dir Output/vmd \
+--json_dir {output_json_dir} \
+--vmd_dir {output_vmd_dir} \
 --data_type camera
 ```
 
