@@ -1229,22 +1229,26 @@ int main(int argc, char* argv[]){
 
     // 入力 BVH ファイルパスを設定（入力番号に基づく）
     string inputBvh = "DataBase/Bvh/m" + input_number_str + ".bvh";
-    string frameIntervalsMsgpack = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
-    string beatFileForInput = "Database/Beats/beat" + input_number_str + ".msgpack";
-    // 全身のデータ(23ジョイント)
-    string standMsgpackDir = "Database/Stand_Raw";
-    string standDatabaseMsgpackDir = "Database/Stand_Split";
-    string rawMsgpackDir = "Database/Raw";
-    string databaseMsgpackDir = "Database/Split";
+    string inputBeat = "Database/Beats/beat" + input_number_str + ".msgpack";
     // ヒップ方向データ
     string hipDirectionMsgpackDir = "Database/Hip_Direction";
     string hipDirectionDatabaseMsgpackDir = "Database/Hip_Direction_Split";
     // 音楽データ
     string musicMsgpackDir = "Database/Music_Features";
     string musicDatabaseMsgpackDir = "Database/Music_Features_Split";
+    
+    // データベース(不変)
+    // 全身のデータ(23ジョイント)
+    string standMsgpackDir = "Database/Stand_Raw";
+    string standDatabaseMsgpackDir = "Database/Stand_Split";
+    string rawMsgpackDir = "Database/Raw";
+    string databaseMsgpackDir = "Database/Split";
     // カメラデータ
     string cameraPositionMsgpackDir = "DataBase/CameraCentric";
     string cameraRotationMsgpackDir = "DataBase/CameraInterpolated";
+    // カット頻度
+    string frameIntervalsMsgpack = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
+    
     // BPM データ
     string bpmMsgpack = "Database/BPM/average_bpm.msgpack";
     // 出力ディレクトリ
@@ -1593,7 +1597,7 @@ int main(int argc, char* argv[]){
     CalDistance2Result cd2Res = calDistance2Msgpack(bpmMsgpack, musicMsgpackDir, musicDatabaseMsgpackDir, inputBvh, standMsgpackDir, standDatabaseMsgpackDir,
                                                      hipDirectionMsgpackDir, hipDirectionDatabaseMsgpackDir,
                                                      rawMsgpackDir, databaseMsgpackDir, frameIntervals, step,
-                                                     modes, cameraPositionMsgpackDir, m, beatFileForInput);
+                                                     modes, cameraPositionMsgpackDir, m, inputBeat);
     
     // カメラデータ組み立て
     CameraRetrievalResult camRes = cameraDataRetrievalMsgpack(cameraPositionMsgpackDir, cameraRotationMsgpackDir,
