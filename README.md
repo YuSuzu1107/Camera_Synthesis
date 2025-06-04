@@ -44,7 +44,7 @@ Music_Features内のデータ  →   input/music/music.msgpack
 
 2. bvh形式でrootをエクスポートし、その結果を再びインポートする。
 
-3. IKボーンを全て削除し、Auto Rig Pro のリマップ機能を用いて`scripts/my_utils/target_bone.bvh` のボーンとスケールを合わせ、bvh形式で出力する。
+3. IKボーンを全て削除し、Auto Rig Pro のリマップ機能を用いてrootボーンとスケールを合わせ、bvh形式で出力する。
 
 4. 以下のコマンドを用いて入力データに変換する。
 
