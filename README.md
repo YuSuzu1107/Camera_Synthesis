@@ -39,6 +39,9 @@ Music_Features内のデータ  →   input/music/music.msgpack
 
 2. ファイルを実行した際に、「番号を入力してください」と出るので、自分が選んだ番号を入れ、カメラワークを出力する。
 
+## 新しいデータに対してカメラワークを生成する場合
+1. Blenderに
+
 ## 可視化
 1. 以下のコマンドを用いて`.vmd`形式に変換する。
 
@@ -93,3 +96,5 @@ m_camera.m_rotate = glm::mix(key0.m_rotate, key1.m_rotate, rotate_y);
 m_camera.m_distance = glm::mix(key0.m_distance, key1.m_distance, distance_y);
 m_camera.m_fov = glm::mix(key0.m_fov, key1.m_fov, fov_y);
 ```
+
+3. Blenderで可視化する場合。Blenderのバージョンが3.Xであることを確認し、[google drive](https://drive.google.com/drive/folders/1BaH2MdcObcDVfT_ahRbwboj3qJmf8UQS?usp=sharing)から`mmd_tools`をダウンロードしアドオンに追加する。
