@@ -25,7 +25,19 @@ g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I
 
 5. 編集モードの場合は質問が順番に表示されるので、()内の選択肢を順番に入力する。
 
-### 既存データに対してカメラワーク生成をする場合
+## 既存データに対してカメラワーク生成をする場合
+1. Raw,Stand_Raw,Hip,Beats,Music_Featuresの中から共通する番号を選び、以下のようにパスを変更する。
+
+```.bash
+Raw内のデータ  　　　　　　  →　　input/motion/raw.msgpack
+Stand_Raw内のデータ　　　　 →   input/motion/stand.msgpack
+Hip内のデータ　　　　　　　　 →   input/motion/hip.msgpack
+
+Beats内のデータ　　　　　　  →   input/music/beat.msgpack
+Music_Features内のデータ  →   input/music/music.msgpack
+```
+
+2. ファイルを実行した際に、「番号を入力してください」と出るので、自分が選んだ番号を入れ、カメラワークを出力する。
 
 ## 可視化
 1. 以下のコマンドを用いて`.vmd`形式に変換する。
