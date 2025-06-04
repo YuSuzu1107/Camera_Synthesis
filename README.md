@@ -26,7 +26,7 @@ g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I
 5. 編集モードの場合は質問が順番に表示されるので、()内の選択肢を順番に入力する。
 
 ## 既存データに対してカメラワーク生成をする場合
-1. Raw,Stand_Raw,Hip,Beats,Music_Featuresの中から共通する番号を選び、以下のようにパスを変更する。
+1. Raw,Stand_Raw,Hip,Beats,Music_Featuresの中から共通する番号を選んで複製し、以下のようにパスを変更する。
 
 ```.bash
 Raw内のデータ  　　　　　　  →　　input/motion/raw.msgpack
