@@ -40,11 +40,13 @@ Music_Features内のデータ  →   input/music/music.msgpack
 2. ファイルを実行した際に、「番号を入力してください」と出るので、自分が選んだ番号を入れ、カメラワークを出力する。
 
 ## 新しいデータ(ボリュメトリックビデオ)に対してカメラワークを生成する場合
-1. Blenderに[MoCapade](https://me.meshcapade.com/from-videos)の出力結果をインポートする。
+1. Blenderに [MoCapade](https://me.meshcapade.com/from-videos) の出力結果をインポートする。
 
 2. bvh形式でrootをエクスポートし、その結果を再びインポートする。
 
-3. IKボーンを全て削除し、Auto Rig Proのリマップ機能を用いて`` スケールを合わせ、bvh形式で出力する。
+3. IKボーンを全て削除し、Auto Rig Pro のリマップ機能を用いて`scripts/my_utils/target_bone.bvh` のボーンとスケールを合わせ、bvh形式で出力する。
+
+4. 以下のコマンドを用いて入力データに変換する。
 
 ## 可視化
 1. 以下のコマンドを用いて`.vmd`形式に変換する。
