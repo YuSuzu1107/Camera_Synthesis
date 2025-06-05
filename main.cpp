@@ -18,6 +18,7 @@
 #include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"
+#include <iostream>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -1139,7 +1140,7 @@ int main(int argc, char* argv[]){
     // モードが "Existing" の場合
     string inputNumber;
     if (file == "Existing") {
-        cout << "入力番号を入力してください\n> ";
+        cout << "番号を入力してください\n> ";
         cin >> inputNumber;
     }
     // モードが "New" の場合
@@ -1157,6 +1158,7 @@ int main(int argc, char* argv[]){
     string view, view_place, movement, movement_place, continue_view, continue_movement;
     vector<int> partial_views;     // 部分的な視点変更を保持するリスト
     vector<int> partial_movements; // 部分的な動き変更を保持するリスト
+    string FrameIntervals;
 
     // モードが "initial" の場合
     if (mode == "initial") {
@@ -1263,8 +1265,11 @@ int main(int argc, char* argv[]){
     string inputMusicPath = inputMusicDir + "/music.msgpack";
 
     // フレーム間隔(カット頻度依存)
-    string FrameIntervals = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
-
+    if (file == "Existing"){
+        FrameIntervals = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
+    } else if (file == "New") {
+        FrameIntervals = "input/music/sabi_frame.msgpack";
+    }
     // データベースのディレクトリ
     // 全身のデータ(23ジョイント)
     string StandPositionDatabaseDir = "Database/Stand_Split";
@@ -1279,6 +1284,7 @@ int main(int argc, char* argv[]){
     // BPM データ
     string BpmData = "Database/BPM/average_bpm.msgpack";
 
+
     // frame_intervals の読み込み（MessagePack 版）
     msgpack::object_handle intervalsOh = readMsgpack(FrameIntervals);
     msgpack::object intervalsObj = intervalsOh.get();
@@ -1286,22 +1292,41 @@ int main(int argc, char* argv[]){
     // 対話入力で得た input_number_str を利用
     vector<int> frameIntervals;
     vector<int> sabi_indices;
-    const msgpack::object* fiMember = getMember(intervalsObj, inputNumber);
-    if (fiMember && fiMember->type == msgpack::type::MAP) {
-        const msgpack::object* arr = getMember(*fiMember, "frame_intervals");
-        if (arr && arr->type == msgpack::type::ARRAY) {
-            for (size_t i = 0; i < arr->via.array.size; i++) {
-                frameIntervals.push_back(arr->via.array.ptr[i].as<int>());
+    if (file == "Existing") {
+        const msgpack::object* fiMember = getMember(intervalsObj, inputNumber);
+        if (fiMember && fiMember->type == msgpack::type::MAP) {
+            const msgpack::object* arr = getMember(*fiMember, "frame_intervals");
+            if (arr && arr->type == msgpack::type::ARRAY) {
+                for (size_t i = 0; i < arr->via.array.size; i++) {
+                    frameIntervals.push_back(arr->via.array.ptr[i].as<int>());
+                }
+            } else {
+                cerr << "Error: frame_intervals_msgpack に " << inputNumber << " が含まれていません\n";
+                return 1;
             }
-        } else {
-            cerr << "Error: frame_intervals_msgpack に " << inputNumber << " が含まれていません\n";
-            return 1;
+            // sabi の読み込み（オプショナル）
+            const msgpack::object* sabiArr = getMember(*fiMember, "sabi");
+            if (sabiArr && sabiArr->type == msgpack::type::ARRAY) {
+                for (size_t i = 0; i < sabiArr->via.array.size; i++) {
+                    sabi_indices.push_back(sabiArr->via.array.ptr[i].as<int>());
+                }
+            }
         }
-        // sabi の読み込み（オプショナル）
-        const msgpack::object* sabiArr = getMember(*fiMember, "sabi");
-        if (sabiArr && sabiArr->type == msgpack::type::ARRAY) {
-            for (size_t i = 0; i < sabiArr->via.array.size; i++) {
-                sabi_indices.push_back(sabiArr->via.array.ptr[i].as<int>());
+    } else if (file == "New") {
+            const msgpack::object* arr = getMember(intervalsObj, "frame_intervals");
+            if (arr && arr->type == msgpack::type::ARRAY) {
+                for (size_t i = 0; i < arr->via.array.size; i++) {
+                    frameIntervals.push_back(arr->via.array.ptr[i].as<int>());
+                }
+            } else {
+                cerr << "Error: frame_intervals_msgpack に " << inputNumber << " が含まれていません\n";
+                return 1;
+            }
+            // sabi の読み込み（オプショナル）
+            const msgpack::object* sabiArr = getMember(intervalsObj, "sabi");
+            if (sabiArr && sabiArr->type == msgpack::type::ARRAY) {
+                for (size_t i = 0; i < sabiArr->via.array.size; i++) {
+                    sabi_indices.push_back(sabiArr->via.array.ptr[i].as<int>());
             }
         }
     }
