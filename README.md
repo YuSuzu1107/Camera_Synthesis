@@ -16,7 +16,7 @@
 ```.bash
 g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I./Library/msgpack-c-cpp_master/include -I ./Library/boost_1_87_0 -o camera_synthesis ./main.cpp
 
-./camera_synthesis {input_motion_data_dir} {input_music_data_dir} {output_json_dir}
+./camera_synthesis input/motion input/music {output_json_dir}
 ```
 
 3. DCMデータセット内のデータに対してカメラワークを生成したければ`Existing`、新しいデータに対してカメラワークを生成したければ`New`と入力する。
@@ -26,6 +26,7 @@ g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I
 5. 編集モードの場合は質問が順番に表示されるので、()内の選択肢を順番に入力する。
 
 ## 既存データに対してカメラワーク生成をする場合
+
 1. Raw,Stand_Raw,Hip,Beats,Music_Featuresの中から共通する番号を選んで複製し、以下のようにパスを変更する。
 
 ```.bash
@@ -70,7 +71,29 @@ bash scripts/make_motion_input.sh
 
 ### 音楽データの準備
 
-1. [Songle]
+1. [Songle](https://songle.jp) のマイページから入力したい楽曲を登録する
+
+2. `scripts/make_motion_input.sh`の以下の部分に楽曲解析ページのURLを入れる。
+
+```.bash
+python3 scripts/my_utils/songle_api.py \
+# ここに入力してください
+--page  [page_url]\
+--output_dir input/music
+
+python3 scripts/my_utils/sabi.py \
+# ここに入力してください
+--page  [page_url]\
+--output_dir input
+```
+
+3. 楽曲データを`input/`に配置する。
+
+4. 以下のコマンドを実行して入力ファイルを出力する。
+
+```.bash
+bash scripts/make_music_input.sh 
+```
 
 ## 可視化
 1. 以下のコマンドを用いて`.vmd`形式に変換する。
