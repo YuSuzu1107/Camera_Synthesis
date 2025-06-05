@@ -40,13 +40,37 @@ Music_Features内のデータ  →   input/music/music.msgpack
 2. ファイルを実行した際に、「番号を入力してください」と出るので、自分が選んだ番号を入れ、カメラワークを出力する。
 
 ## 新しいデータ(ボリュメトリックビデオ)に対してカメラワークを生成する場合
+
+### モーションデータの準備
+
 1. Blenderに [MoCapade](https://me.meshcapade.com/from-videos) の出力結果をインポートする。
 
 2. bvh形式でrootをエクスポートし、その結果を再びインポートする。
 
 3. IKボーンを全て削除し、Auto Rig Pro のリマップ機能を用いてrootボーンとスケールを合わせ、bvh形式で出力する。
 
-4. 以下のコマンドを用いて入力データに変換する。
+4. `input/`に出力のbvhを配置し、`raw.bvh`とする。
+
+5. 以下のコマンドを用いてjson形式からmessagepack形式に変換するコードをコンパイルする。
+   
+```.bash
+g++ -std=c++17 -O2 \
+    -I./Library/rapidjson/include \
+    -I./Library/msgpack-c-cpp_master/include \
+    -I./Library/boost_1_87_0 \
+    ./scripts/json2msgpack.cpp \
+    -o ./scripts/json2msgpack
+```
+
+6. 以下のコマンドを実行して入力ファイルを出力する。
+
+```.bash
+bash scripts/make_motion_input.sh 
+```
+
+### 音楽データの準備
+
+1. [Songle]
 
 ## 可視化
 1. 以下のコマンドを用いて`.vmd`形式に変換する。
