@@ -1,11 +1,11 @@
 python3 scripts/my_utils/beat.py \
 # ここに入力してください
---page  "https://songle.jp/songs/songle.jp%2Fuploads%2Fct8m4peiqnulo43nehig.mp3" \
+--page  [SONGLE_URL] \
 --output_dir input/music
 
 python3 scripts/my_utils/sabi.py \
 # ここに入力してください
---page  "https://songle.jp/songs/songle.jp%2Fuploads%2Fct8m4peiqnulo43nehig.mp3" \
+--page  [SONGLE_URL] \
 --output_dir input
 
 python3 scripts/my_utils/music.py \
