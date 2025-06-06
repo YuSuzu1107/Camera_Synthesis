@@ -48,7 +48,7 @@ Music_Features内のデータ  →   input/music/music.msgpack
 
 2. bvh形式でrootをエクスポートし、その結果を再びインポートする。
 
-3. IKボーンを全て削除し、Auto Rig Pro のリマップ機能を用いてrootボーンとスケールを合わせ、bvh形式で出力する。
+3. IKボーンを全て削除し、Auto Rig Pro のリマップ機能を用いて元モーションとスケールを合わせ、bvh形式で出力する。
 
 4. `input/`に出力のbvhを配置し、`raw.bvh`とする。
 
