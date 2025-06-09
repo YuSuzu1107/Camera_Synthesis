@@ -78,12 +78,12 @@ bash scripts/make_motion_input.sh
 ```.bash
 # ここに入力してください
 python3 scripts/my_utils/songle_api.py \
---page  [page_url]\
+--page  [SONGLE_URL]\
 --output_dir intermediate/music
 
 # ここに入力してください
 python3 scripts/my_utils/sabi.py \
---page  [page_url]\
+--page  [SONGLE_URL]\
 --output_dir input
 ```
 
