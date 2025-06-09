@@ -1279,8 +1279,8 @@ int main(int argc, char* argv[]){
     // 音楽データ
     string MusicDatabaseDir = "Database/Music_Features_Split";
     // カメラデータ
-    string CameraPositionDir = "DataBase/CameraCentric";
-    string CameraRotationDir = "DataBase/CameraInterpolated";
+    string CameraPositionDir = "Database/CameraCentric";
+    string CameraRotationDir = "Database/CameraInterpolated";
     // BPM データ
     string BpmData = "Database/BPM/average_bpm.msgpack";
 
