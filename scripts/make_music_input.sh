@@ -1,10 +1,10 @@
-python3 scripts/my_utils/beat.py \
 # ここに入力してください
+python3 scripts/my_utils/beat.py \
 --page  [SONGLE_URL] \
 --output_dir intermediate/music
 
-python3 scripts/my_utils/sabi.py \
 # ここに入力してください
+python3 scripts/my_utils/sabi.py \
 --page  [SONGLE_URL] \
 --output_dir input
 
