@@ -1268,7 +1268,7 @@ int main(int argc, char* argv[]){
     if (file == "Existing"){
         FrameIntervals = "DataBase/Frame_Intervals/frame_intervals_" + std::to_string(cut_number) + ".msgpack";
     } else if (file == "New") {
-        FrameIntervals = "input/music/sabi_frame.msgpack";
+        FrameIntervals = inputMusicDir + "/sabi_frame.msgpack";
     }
     // データベースのディレクトリ
     // 全身のデータ(23ジョイント)
