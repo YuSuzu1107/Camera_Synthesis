@@ -13,7 +13,7 @@ def get_songle_api_url(url, output_dir):
         data = response.json()
         
         # ローカルファイルに保存
-        output_file = os.path.join(output_dir, 'beat.json')
+        output_file = os.path.join(output_dir, 'sabi.json')
         with open(output_file, "w", encoding="utf-8") as file:
             json.dump(data, file, ensure_ascii=False)
         
