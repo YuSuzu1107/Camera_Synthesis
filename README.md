@@ -16,7 +16,7 @@
 ```.bash
 g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I./Library/msgpack-c-cpp_master/include -I ./Library/boost_1_87_0 -o camera_synthesis ./main.cpp
 
-./camera_synthesis input/motion input/music {output_json_dir}
+./camera_synthesis intermediate/motion intermediate/music {output_json_dir}
 ```
 
 3. DCMデータセット内のデータに対してカメラワークを生成したければ`Existing`、新しいデータに対してカメラワークを生成したければ`New`と入力する。
@@ -30,12 +30,12 @@ g++ -O3 -march=native -flto -DNDEBUG -std=c++17 -I./Library/rapidjson/include -I
 1. Raw,Stand_Raw,Hip,Beats,Music_Featuresの中から共通する番号を選んで複製し、以下のようにパスを変更する。
 
 ```.bash
-Raw内のデータ  　　　　　　  →　　input/motion/raw.msgpack
-Stand_Raw内のデータ　　　　 →   input/motion/stand.msgpack
-Hip内のデータ　　　　　　　　 →   input/motion/hip.msgpack
+Raw内のデータ  　　　　　　  →　　intermediate/motion/raw.msgpack
+Stand_Raw内のデータ　　　　 →   intermediate/motion/stand.msgpack
+Hip内のデータ　　　　　　　　 →   intermediate/motion/hip.msgpack
 
-Beats内のデータ　　　　　　  →   input/music/beat.msgpack
-Music_Features内のデータ  →   input/music/music.msgpack
+Beats内のデータ　　　　　　  →   intermediate/music/beat.msgpack
+Music_Features内のデータ  →   intermediate/music/music.msgpack
 ```
 
 2. ファイルを実行した際に、「番号を入力してください」と出るので、自分が選んだ番号を入れ、カメラワークを出力する。
@@ -79,7 +79,7 @@ bash scripts/make_motion_input.sh
 python3 scripts/my_utils/songle_api.py \
 # ここに入力してください
 --page  [page_url]\
---output_dir input/music
+--output_dir intermediate/music
 
 python3 scripts/my_utils/sabi.py \
 # ここに入力してください
