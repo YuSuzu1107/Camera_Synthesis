@@ -76,13 +76,13 @@ bash scripts/make_motion_input.sh
 2. `scripts/make_motion_input.sh`の以下の部分に楽曲解析ページのURLを入れる。
 
 ```.bash
-python3 scripts/my_utils/songle_api.py \
 # ここに入力してください
+python3 scripts/my_utils/songle_api.py \
 --page  [page_url]\
 --output_dir intermediate/music
 
-python3 scripts/my_utils/sabi.py \
 # ここに入力してください
+python3 scripts/my_utils/sabi.py \
 --page  [page_url]\
 --output_dir input
 ```
