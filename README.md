@@ -3,7 +3,7 @@
 
 <p float="left">
 	<img src="media/01.gif" width="250" /> <img src="media/02.gif" width="250" />
-</p>
+        </p>
  
 ## 必要なファイル
 
