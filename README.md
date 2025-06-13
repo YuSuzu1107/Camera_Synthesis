@@ -6,7 +6,7 @@
   <img src="media/03.gif" width="800" alt="01.gif" />
 </p>
 	
-### 実写のダンス映像に対して作成したカメラワーク
+### 実写のダンス映像に対して合成したカメラワーク
 <p align="center">
   <img src="media/01.gif" width="400" alt="01.gif" />
   <img src="media/02.gif" width="400" alt="02.gif" />
