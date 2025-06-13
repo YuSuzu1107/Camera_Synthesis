@@ -1,6 +1,10 @@
 # CameraSynthesis
 バーチャルCG／実写のダンス映像において、ユーザーが「注目したい身体部位」「寄りか引きか」「動きの速さ」などの好みを指定すると、データベースから当該ダンス・楽曲に適し、かつユーザーの好みに合ったカメラワークを参照し、最適な視点と軌道を自動合成するシステム。
 
+<p float="left">
+	<img src="media/01.gif" width="250" /> <img src="media/02.gif" width="250" />
+</p>
+ 
 ## 必要なファイル
 
 * [Boost 1.87.0](https://www.boost.org/releases/1.87.0/)
