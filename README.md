@@ -1,8 +1,14 @@
 # CameraSynthesis
 バーチャルCG／実写のダンス映像において、ユーザーが「注目したい身体部位」「寄りか引きか」「動きの速さ」などの好みを指定すると、データベースから当該ダンス・楽曲に適し、かつユーザーの好みに合ったカメラワークを参照し、最適な視点と軌道を自動合成するシステム。
 
+ユーザーの好みを反映したカメラワーク
 <p float="left">
-	<img src="media/01.gif"/> <img src="media/02.gif" />
+	<img src="media/03.gif"/>
+        </p>
+	
+実写のダンス映像に対して作成したカメラワーク
+<p float="left">
+	<img src="media/01.gif" width = "200"/> <img src="media/02.gif" width = "200"/>
         </p>
  
 ## 必要なファイル
