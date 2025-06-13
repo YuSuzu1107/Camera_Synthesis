@@ -9,7 +9,7 @@
 これを`Library/` ディレクトリの下に配置する。
 
 ## 手順
-1. [google drive](https://drive.google.com/drive/folders/1Q9HqYq2YPFhb8IbXfEeantl1hpu3jjaV?usp=share_link) (許可が必要)からファイルをダウンロードし、`DataBase/` ディレクトリの下に配置する。
+1. [google drive](https://drive.google.com/drive/folders/1Q9HqYq2YPFhb8IbXfEeantl1hpu3jjaV?usp=share_link)からファイルをダウンロードし、`DataBase/` ディレクトリの下に配置する。
 
 2. 以下のコマンドでコンパイルし、実行する。
 
