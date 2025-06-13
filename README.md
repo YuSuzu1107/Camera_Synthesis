@@ -7,9 +7,10 @@
         </p>
 	
 実写のダンス映像に対して作成したカメラワーク
-<p float="left">
-	<img src="media/01.gif" width = "200"/> <img src="media/02.gif" width = "200"/>
-        </p>
+<p align="center">
+  <img src="media/01.gif" width="400" alt="01.gif" />
+  <img src="media/02.gif" width="400" alt="02.gif" />
+</p>
  
 ## 必要なファイル
 
