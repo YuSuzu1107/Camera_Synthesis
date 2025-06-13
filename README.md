@@ -21,7 +21,7 @@
 これを`Library/` ディレクトリの下に配置する。
 
 ## 手順
-1. 参照先となるデータベースをDCMデータベースを元に作成し、`DataBase/` ディレクトリの下に配置する。(DCMデータセットは[DancaCamera3D](https://github.com/Carmenw1203/DanceCamera3D-Official)の手順に沿ってダウンロードできる。詳しいデータベースの構築方法は追加予定)
+1. 参照先となるデータベースをDCMデータセットを元に作成し、`DataBase/` ディレクトリの下に配置する。(DCMデータセットは[DancaCamera3D](https://github.com/Carmenw1203/DanceCamera3D-Official)の手順に沿ってダウンロードできる。詳しいデータベースの構築方法は追加予定)
 
 2. 以下のコマンドでコンパイルし、実行する。
 
