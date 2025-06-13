@@ -153,5 +153,5 @@ m_camera.m_fov = glm::mix(key0.m_fov, key1.m_fov, fov_y);
 3. Blenderで可視化する場合。Blenderのバージョンが3.Xであることを確認し、[google drive](https://drive.google.com/drive/folders/1BaH2MdcObcDVfT_ahRbwboj3qJmf8UQS?usp=sharing)から`mmd_tools`をダウンロードしアドオンに追加する。
 
 ## 謝辞
-Saba Viewerを提供してくださったbenikabocha氏、モデルを提供してくださった神帝宇氏、DCM Datasetを提供してくださったWang氏に心から感謝します。
+Saba_Viewerを提供してくださったbenikabocha氏、モデルを提供してくださった神帝宇氏、DCMデータセットを提供してくださったWang氏に心から感謝します。
 
